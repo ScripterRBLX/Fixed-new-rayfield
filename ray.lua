@@ -16,6 +16,7 @@ local Release = "Build 1.67"
 local RayfieldFolder = "Rayfield"
 local ConfigurationFolder = RayfieldFolder.."/Configurations"
 local ConfigurationExtension = ".rfld"
+local extraDatas = {}
 local settingsTable = {
 	General = {
 		-- if needs be in order just make getSetting(name)
@@ -776,7 +777,7 @@ end
 local function LoadConfiguration(Configuration)
 	local success, Data = pcall(function() return HttpService:JSONDecode(Configuration) end)
 	local changed
-	
+
 	if not success then warn('Rayfield had an issue decoding the configuration file, please try delete the file and reopen Rayfield.') return end
 
 	-- Iterate through current UI elements' flags
@@ -795,19 +796,47 @@ local function LoadConfiguration(Configuration)
 					end
 				end
 			end)
+		elseif FlagName == "autocrash" then
+			extraDatas = HttpService:JSONDecode(FlagValue)
+			print(FlagValue)
 		else
 			warn("Rayfield | Unable to find '"..FlagName.. "' in the save file.")
 			print("The error above may not be an issue if new elements have been added or not been set values.")
 			--RayfieldLibrary:Notify({Title = "Rayfield Flags", Content = "Rayfield was unable to find '"..FlagName.. "' in the save file. Check sirius.menu/discord for help.", Image = 3944688398})
+			
 		end
 	end
 
 	return changed
 end
 
+function RayfieldLibrary:AddToConfig(dataName,data)
+	repeat task.wait() until configLoaded
+
+	local Data = {}
+	for i,v in pairs(RayfieldLibrary.Flags) do
+		if v.Type == "ColorPicker" then
+			Data[i] = PackColor(v.Color)
+		else
+			Data[i] = v.CurrentValue or v.CurrentKeybind or v.CurrentOption or v.Color
+		end
+	end	
+
+	Data[dataName] = data
+
+	print(tostring(HttpService:JSONEncode(Data)))	
+
+	extraDatas[dataName] = {
+		Value = data,
+		name = dataName
+	}
+
+	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+end
+
 local function SaveConfiguration()
 	if not CEnabled or not globalLoaded then return end
-	
+
 	if debugX then
 		print('Saving')
 	end
@@ -844,9 +873,13 @@ local function SaveConfiguration()
 		TextBox.Text = HttpService:JSONEncode(Data)
 		TextBox.ClearTextOnFocus = false
 	end
-	
+
 	if debugX then
 		warn(HttpService:JSONEncode(Data))
+	end
+	
+	for _,v in pairs(extraDatas) do
+		Data[v.name] = v.Value
 	end
 
 	if writefile then
@@ -1409,9 +1442,9 @@ function RayfieldLibrary:CreateWindow(Settings)
 			Rayfield.Loading.Visible = false
 		end
 	end
-	
+
 	if getgenv then getgenv().rayfieldCached = true end
-	
+
 	if not correctBuild and not Settings.DisableBuildWarnings then
 		task.delay(3, 
 			function() 
@@ -2468,11 +2501,11 @@ function RayfieldLibrary:CreateWindow(Settings)
 			function InputSettings:Set(text)
 				Input.InputFrame.InputBox.Text = text
 				InputSettings.CurrentValue = text
-				
+
 				local Success, Response = pcall(function()
 					InputSettings.Callback(text)
 				end)
-				
+
 				if not InputSettings.Ext then
 					SaveConfiguration()
 				end
@@ -3512,7 +3545,7 @@ end
 
 function RayfieldLibrary:LoadConfiguration()
 	local config
-	
+
 	if debugX then
 		warn('Loading Configuration')
 	end
