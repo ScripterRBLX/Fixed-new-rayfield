@@ -811,8 +811,7 @@ local function LoadConfiguration(Configuration)
 end
 
 function RayfieldLibrary:AddToConfig(dataName,data)
-	repeat task.wait() until configLoaded
-
+	
 	local Data = {}
 	for i,v in pairs(RayfieldLibrary.Flags) do
 		if v.Type == "ColorPicker" then
