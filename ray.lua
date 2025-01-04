@@ -811,6 +811,8 @@ local function LoadConfiguration(Configuration)
 end
 
 function RayfieldLibrary:AddToConfig(dataName,data)
+
+	print("Adding data to config...")
 	
 	local Data = {}
 	for i,v in pairs(RayfieldLibrary.Flags) do
