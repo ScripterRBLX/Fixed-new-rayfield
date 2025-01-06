@@ -811,8 +811,6 @@ local function LoadConfiguration(Configuration)
 end
 
 function RayfieldLibrary:AddToConfig(dataName,data)
-
-	print("Adding data to config...")
 	
 	local Data = {}
 	for i,v in pairs(RayfieldLibrary.Flags) do
@@ -833,6 +831,7 @@ function RayfieldLibrary:AddToConfig(dataName,data)
 	}
 
 	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+	
 end
 
 local function SaveConfiguration()
@@ -3415,6 +3414,15 @@ end
 function RayfieldLibrary:Destroy()
 	hideHotkeyConnection:Disconnect()
 	Rayfield:Destroy()
+end
+
+function RayfieldLibrary:GetFromConfig(dataName)
+	local Data = HttpService:JSONDecode(readfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension))
+	for FlagName, FlagValue in next, Data do
+		if Data[dataName] then
+			return Data[dataName]
+		end
+	end
 end
 
 Topbar.ChangeSize.MouseButton1Click:Connect(function()
