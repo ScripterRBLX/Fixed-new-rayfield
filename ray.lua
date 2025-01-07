@@ -774,6 +774,8 @@ local function UnpackColor(Color)
 	return Color3.fromRGB(Color.R, Color.G, Color.B)
 end
 
+local configLoaded = false
+
 local function LoadConfiguration(Configuration)
 	local success, Data = pcall(function() return HttpService:JSONDecode(Configuration) end)
 	local changed
@@ -806,11 +808,13 @@ local function LoadConfiguration(Configuration)
 			
 		end
 	end
-
+	
 	return changed
 end
 
 function RayfieldLibrary:AddToConfig(dataName,data)
+	
+	repeat task.wait() until configLoaded
 	
 	local Data = {}
 	for i,v in pairs(RayfieldLibrary.Flags) do
@@ -3592,6 +3596,8 @@ function RayfieldLibrary:LoadConfiguration()
 	end
 
 	globalLoaded = true
+	
+	configLoaded = true
 end
 
 
