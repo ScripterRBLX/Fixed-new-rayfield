@@ -809,6 +809,8 @@ local function LoadConfiguration(Configuration)
 		end
 	end
 	
+	configLoaded = true
+	
 	return changed
 end
 
@@ -3421,6 +3423,8 @@ function RayfieldLibrary:Destroy()
 end
 
 function RayfieldLibrary:GetFromConfig(dataName)
+	repeat task.wait() until configLoaded
+	
 	local Data = HttpService:JSONDecode(readfile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension))
 	for FlagName, FlagValue in next, Data do
 		if Data[dataName] then
@@ -3557,8 +3561,7 @@ end
 
 
 function RayfieldLibrary:LoadConfiguration()
-	local config
-
+	
 	if debugX then
 		warn('Loading Configuration')
 	end
@@ -3596,8 +3599,6 @@ function RayfieldLibrary:LoadConfiguration()
 	end
 
 	globalLoaded = true
-	
-	configLoaded = true
 end
 
 
